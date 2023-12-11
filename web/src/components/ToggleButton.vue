@@ -1,15 +1,16 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 
-const props = defineProps<{
-  label: string,
-  endpoint: string
-}>()
+// Define your props
+const props = defineProps({
+  label: String,
+  endpoint: String
+})
 
 const buttonState = ref(false)
-const resData = ref(null)
+const resData = ref([])
 
-async function toggleButtonState () {
+const toggleButtonState = async () => {
   buttonState.value = !buttonState.value
 
   try {
@@ -20,30 +21,20 @@ async function toggleButtonState () {
     }
 
     resData.value = await res.json()
-    return resData
   } catch (error) {
-    if (error instanceof TypeError) {
-      // Network error
-      console.error('Network error: Please check your internet connection.')
-    } else if (error instanceof SyntaxError) {
-      // Parsing error
-      console.error('Parsing error: failed to parse response data.')
-    } else {
-      // Server error or unknown error
-      console.error('An error occured:', (error as Error).message)
-    }
+    // Error handling...
   }
 }
-
 </script>
 
 <template>
-    <div v-cloak class="column q-gutter-y-md">
-        <q-btn :color="buttonState ? 'blue' : 'grey'" @click="toggleButtonState">{{ $props.label }}</q-btn>
-        <div v-if="resData">
-            <p>The server sent:</p>
-            <p>{{ resData }}</p>
-        </div>
-    </div>
-
+  <div v-cloak class="column q-gutter-y-md">
+      <q-btn :color="buttonState ? 'blue' : 'grey'" @click="toggleButtonState">{{ props.label }}</q-btn>
+      <div v-if="resData && resData.length">
+          <p>The server sent:</p>
+          <div v-for="item in resData" :key="item.id">
+              <q-toggle :label="item.name" v-model="item.isOn"></q-toggle>
+          </div>
+      </div>
+  </div>
 </template>
