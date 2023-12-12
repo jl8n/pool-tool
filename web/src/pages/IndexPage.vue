@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { fetchVisibleFeatures } from '../fetches/poolFetch.ts'
+import { fetchVisibleFeatures, poolSetState } from '../fetches/poolFetch.ts'
 // import { fetchVisibleFeatures } from 'web/src/fetches/poolFetch.ts'
 const dataObjects = ref([])
 
@@ -12,31 +12,18 @@ const fetchData = async () => {
   }
 }
 
-// const toggleFeature = async (item, newState) => {
-//   try {
-//     const response = await fetch('http://localhost:3000/setState', {
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify({
-//         id: item.id,
-//         state: newState,
-//         equipmentType: item.equipmentType
-//       })
-//     })
+const toggleFeature = async (item, newState) => {
+  try {
+    // Call the poolSetState function
+    await poolSetState(item.id, newState, item.equipmentType)
 
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! Status: ${response.status}`)
-//     }
-
-//     // Update the local state to reflect the change
-//     item.isOn = newState
-//     console.log('State updated for ID:', item.id)
-//   } catch (error) {
-//     console.error('Error updating state:', error.message)
-//   }
-// }
+    // Update the local state to reflect the change
+    item.isOn = newState
+    console.log('State updated for ID:', item.id)
+  } catch (error) {
+    console.error('Error updating state:', error.message)
+  }
+}
 
 fetchData()
 </script>
