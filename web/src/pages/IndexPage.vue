@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue'
-
+import { fetchVisibleFeatures } from '../fetches/poolFetch.ts'
+// import { fetchVisibleFeatures } from 'web/src/fetches/poolFetch.ts'
 const dataObjects = ref([])
 
 const fetchData = async () => {
   try {
-    const response = await fetch('http://localhost:3000/state/visible')
+    const response = await fetchVisibleFeatures()
+
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`)
     }
