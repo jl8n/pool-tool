@@ -6,42 +6,37 @@ const dataObjects = ref([])
 
 const fetchData = async () => {
   try {
-    const response = await fetchVisibleFeatures()
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-    }
-    dataObjects.value = await response.json()
-  } catch (error) {
-    console.error('An error occurred:', error.message)
-  }
-}
-
-const toggleFeature = async (item, newState) => {
-  try {
-    const response = await fetch('http://localhost:3000/setState', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id: item.id,
-        state: newState,
-        equipmentType: item.equipmentType
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-    }
-
-    // Update the local state to reflect the change
-    item.isOn = newState
-    console.log('State updated for ID:', item.id)
+    dataObjects.value = await fetchVisibleFeatures()
   } catch (error) {
     console.error('Error updating state:', error.message)
   }
 }
+
+// const toggleFeature = async (item, newState) => {
+//   try {
+//     const response = await fetch('http://localhost:3000/setState', {
+//       method: 'PUT',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({
+//         id: item.id,
+//         state: newState,
+//         equipmentType: item.equipmentType
+//       })
+//     })
+
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`)
+//     }
+
+//     // Update the local state to reflect the change
+//     item.isOn = newState
+//     console.log('State updated for ID:', item.id)
+//   } catch (error) {
+//     console.error('Error updating state:', error.message)
+//   }
+// }
 
 fetchData()
 </script>
