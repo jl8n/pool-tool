@@ -1,5 +1,6 @@
 // const POOL_API_BASE_URL = 'http://65.130.181.10:4200' // Pool API URL
-const POOL_API_BASE_URL = 'http://localhost:4200' // Pool API URL
+// const POOL_API_BASE_URL = 'http://localhost:4200' // Pool API URL
+const POOL_API_BASE_URL = 'http://127.0.0.1:4200' // Pool API URL
 
 export async function fetchVisibleFeatures () {
   try {
@@ -12,6 +13,24 @@ export async function fetchVisibleFeatures () {
 
     const resData = await res.json()
     return parseVisibleFeatures(resData)
+  } catch (error) {
+    console.error('Error updating state:', error || 'Unknown error')
+    throw error
+  }
+}
+
+export async function fetchDashboard () {
+  try {
+    const endpoint = `${POOL_API_BASE_URL}/state/temps`
+    const res = await fetch(endpoint)
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`)
+    }
+
+    const resData = await res.json()
+    console.warn('fetchDashboard: ', resData)
+    return resData
   } catch (error) {
     console.error('Error updating state:', error || 'Unknown error')
     throw error
