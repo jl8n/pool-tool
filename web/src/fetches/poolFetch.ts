@@ -2,7 +2,9 @@
 // const POOL_API_BASE_URL = 'http://localhost:4200' // Pool API URL
 const POOL_API_BASE_URL = 'http://127.0.0.1:4200' // Pool API URL
 
-export async function fetchVisibleFeatures () {
+import { parseSchedules } from './poolHelper.js'
+
+export async function fetchAll () {
   try {
     const endpoint = `${POOL_API_BASE_URL}/state/all`
     const res = await fetch(endpoint)
@@ -11,8 +13,23 @@ export async function fetchVisibleFeatures () {
       throw new Error(`HTTP error! Status: ${res.status}`)
     }
 
-    const resData = await res.json()
-    return parseVisibleFeatures(resData)
+    return await res.json()
+  } catch (error) {
+    console.error('Error updating state:', error || 'Unknown error')
+    throw error
+  }
+}
+
+export async function fetchSchedules () {
+  try {
+    const endpoint = `${POOL_API_BASE_URL}/state/schedules`
+    const res = await fetch(endpoint)
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`)
+    }
+
+    return parseSchedules(await res.json())
   } catch (error) {
     console.error('Error updating state:', error || 'Unknown error')
     throw error
@@ -29,28 +46,12 @@ export async function fetchDashboard () {
     }
 
     const resData = await res.json()
-    console.warn('fetchDashboard: ', resData)
+    console.warn('fetching Dashboard: ', resData)
     return resData
   } catch (error) {
     console.error('Error updating state:', error || 'Unknown error')
     throw error
   }
-}
-
-function parseVisibleFeatures (obj: object, results: object[] = []): object[] {
-  if (typeof obj === 'object' && obj !== null) {
-    if (Array.isArray(obj)) {
-      for (const item of obj) {
-        if (Object.prototype.hasOwnProperty.call(item, 'showInFeatures') && item.showInFeatures === true) {
-          results.push(item)
-        }
-        parseVisibleFeatures(item, results)
-      }
-    } else {
-      Object.values(obj).forEach(value => parseVisibleFeatures(value, results))
-    }
-  }
-  return results
 }
 
 export async function poolSetState (id: number, state: boolean, equipmentType: string) {
