@@ -1,31 +1,41 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { QIcon, QToggle } from 'quasar'
+import { QToggle } from 'quasar'
 import { useLayoutStore } from 'stores/layout-store'
-import { poolSetState, fetchDashboard, fetchSchedules, fetchAll } from '../fetches/poolFetch.ts'
-import { parseVisibleFeatures } from '../fetches/poolHelper.ts'
+import { poolSetState, fetchDashboard, fetchSchedules, fetchAll } from '../fetches/poolFetch'
+import { parseVisibleFeatures, SimplifiedSchedule } from '../fetches/poolHelper'
+import type { NixieResponse, TempBody } from 'pages/IndexPage.types'
 // import { apiRequest } from 'src/fetches/generic'
 
 const layoutStore = useLayoutStore()
-const poolDataAll = ref([])
-const poolSchedules = ref([])
-const poolVisibleFeatures = ref([])
+
+const poolDataAll = ref<NixieResponse>()
+const poolSchedules = ref<SimplifiedSchedule[]>([])
+const poolVisibleFeatures = ref<SimplifiedSchedule[]>([])
+
 const poolTemps = ref({ // Will hold the fetched dashboard data
   air: '',
   units: {
     name: ''
   },
-  bodies: []
+  bodies: [] as TempBody[]
 })
 
-// const data = await apiRequest('state/all', '')
-// console.log('data', data)
-
 const currentDateTime = ref(new Date().toLocaleString())
-let intervalId
+let intervalId: ReturnType<typeof setInterval>
 
-const pool = computed(() => poolTemps.value.bodies.find(body => body.type.name === 'pool'))
-const spa = computed(() => poolTemps.value.bodies.find(body => body.type.name === 'spa'))
+const pool = computed<TempBody | undefined>(() => {
+  if (poolTemps.value.bodies.length) {
+    return poolTemps.value.bodies.find(
+      (body: TempBody) => body.type.name === 'pool'
+    )
+  }
+  return undefined // or null, depending on your needs
+})
+
+const spa = computed<TempBody | undefined>(() =>
+  poolTemps.value.bodies.find(body => body.type.name === 'spa')
+)
 
 // State to track if the drawer is open
 onMounted(async () => {
@@ -33,15 +43,20 @@ onMounted(async () => {
     poolTemps.value = await fetchDashboard()
     poolSchedules.value = await fetchSchedules()
     poolDataAll.value = await fetchAll()
-    poolVisibleFeatures.value = parseVisibleFeatures(poolDataAll.value)
-    layoutStore.easytouchVersion = poolDataAll.value.model
-
+    if (poolDataAll.value) {
+      // Safe to access properties
+      poolVisibleFeatures.value = parseVisibleFeatures(poolDataAll.value)
+      layoutStore.easytouchVersion = poolDataAll.value.model
+    } else {
+      // Handle the null case, set features and version to appropriate values
+    }
     intervalId = setInterval(() => {
       currentDateTime.value = new Date().toLocaleString()
     }, 1000)
   } catch (error) {
-    console.error('Error fetching data:', error.message)
-    // Consider setting an error state here and displaying it in the template
+    let message = 'Unknown error'
+    if (error instanceof Error) message = error.message
+    console.error('Error fetching data:', message)
   }
 })
 
@@ -49,7 +64,7 @@ onUnmounted(() => {
   clearInterval(intervalId)
 })
 
-const toggleFeature = async (item, newState) => {
+const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
   try {
     // Call the poolSetState function
     await poolSetState(item.id, newState, item.equipmentType)
@@ -58,7 +73,9 @@ const toggleFeature = async (item, newState) => {
     item.isOn = newState
     console.log('State updated for ID:', item.id)
   } catch (error) {
-    console.error('Error updating state:', error.message)
+    let message = 'Unknown error'
+    if (error instanceof Error) message = error.message
+    console.error('Error updating state data:', message)
   }
 }
 </script>
@@ -67,7 +84,7 @@ const toggleFeature = async (item, newState) => {
   <q-page padding>
     <div class="row space-between">
       <div class="col">
-        {{ poolDataAll.model }}
+        {{ poolDataAll?.model }}
       </div>
       <div class="col text-h7 text-right">
         {{ currentDateTime }}
@@ -75,7 +92,7 @@ const toggleFeature = async (item, newState) => {
     </div>
 
     <div>
-      <q-icon
+      <!-- <q-icon
         v-if="isReady"
         name="check_circle"
         class="text-green"
@@ -84,7 +101,7 @@ const toggleFeature = async (item, newState) => {
       <q-icon
         name="settings"
         right
-      />
+      /> -->
     </div>
     <div class="left-column">
       <div class="temperature-display">
@@ -92,10 +109,7 @@ const toggleFeature = async (item, newState) => {
           <i class="fas fa-sun" />
           Air Temp: {{ poolTemps?.air }}°{{ poolTemps?.units?.name }}
         </div>
-        <div
-          v-if="poolTemps && pool"
-          class="section pool"
-        >
+        <div v-if="poolTemps && pool" class="section pool">
           <div class="section-header">
             <i class="fas fa-tint" />
             {{ pool.name }}
@@ -113,10 +127,7 @@ const toggleFeature = async (item, newState) => {
             Heater Status: {{ pool.heatStatus.desc }}
           </div>
         </div>
-        <div
-          v-if="poolTemps && spa"
-          class="section spa"
-        >
+        <div v-if="poolTemps && spa" class="section spa">
           <div class="section-header">
             <i class="fas fa-hot-tub" />
             {{ spa.name }}
@@ -151,17 +162,10 @@ const toggleFeature = async (item, newState) => {
         </div>
         <!-- Features Toggle Components -->
         <div class="q-gutter-y-md">
-          {{ poolVisibleFeatures.value }}
-          <div
-            v-for="obj in poolVisibleFeatures"
-            :key="obj.id"
-            class="flex items-center"
-          >
-            <q-toggle
-              :label="obj.name"
-              :model-value="obj.isOn"
-              @update:model-value="newState => toggleFeature(obj, newState)"
-            />
+          {{ poolVisibleFeatures }}
+          <div v-for="obj in poolVisibleFeatures" :key="obj.id" class="flex items-center">
+            <q-toggle :label="obj.name" :model-value="obj.isOn"
+              @update:model-value="newState => toggleFeature(obj, newState)" />
           </div>
         </div>
       </div>
@@ -170,11 +174,7 @@ const toggleFeature = async (item, newState) => {
         <div class="section-header">
           Schedules
         </div>
-        <div
-          v-for="schedule in poolSchedules"
-          :key="schedule.id"
-          class="schedule-item"
-        >
+        <div v-for="schedule in poolSchedules" :key="schedule.id" class="schedule-item">
           <strong>{{ schedule.name }}</strong> {{ schedule.startTime }} - {{ schedule.endTime }}
           <table class="days-table">
             <tr>
@@ -187,10 +187,7 @@ const toggleFeature = async (item, newState) => {
               <th>Sat</th>
             </tr>
             <tr>
-              <td
-                v-for="(day, index) in schedule.days"
-                :key="index"
-              >
+              <td v-for="(day, index) in schedule.days" :key="index">
                 <span v-if="day === 1">✓</span>
               </td>
             </tr>

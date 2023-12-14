@@ -1,17 +1,18 @@
-export function parseVisibleFeatures (obj: object, results: object[] = []): object[] {
-  if (typeof obj === 'object' && obj !== null) {
-    if (Array.isArray(obj)) {
-      for (const item of obj) {
-        if (Object.prototype.hasOwnProperty.call(item, 'showInFeatures') && item.showInFeatures === true) {
-          results.push(item)
-        }
-        parseVisibleFeatures(item, results)
-      }
-    } else {
-      Object.values(obj).forEach(value => parseVisibleFeatures(value, results))
-    }
-  }
-  return results
+interface Feature {
+  id: number;
+  name: string;
+  // ... other relevant properties for displaying features
+}
+
+export interface SimplifiedSchedule {
+  id: number;
+  name: string;
+  startTime: number;
+  endTime: number;
+  days: number[];
+  isOn: boolean;
+  isLight: boolean;
+  equipmentType: string;
 }
 
 interface Day {
@@ -27,7 +28,7 @@ interface Circuit {
   name: string;
 }
 
-interface Schedule {
+export interface Schedule {
   id: number;
   startTime: number;
   endTime: number;
@@ -38,15 +39,25 @@ interface Schedule {
   equipmentType: string;
 }
 
-interface SimplifiedSchedule {
-  id: number;
-  name: string;
-  startTime: number;
-  endTime: number;
-  days: number[];
-  isOn: boolean;
-  isLight: boolean;
-  equipmentType: string;
+export function parseVisibleFeatures (obj: SimplifiedSchedule, results: Feature[] = []): Feature[] {
+  if (typeof obj === 'object' && obj !== null) {
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        if (item && item.showInFeatures === true) {
+          results.push(item)
+        }
+        parseVisibleFeatures(item, results) // Now item potentially has inferred type
+      }
+    } else {
+      Object.values(obj).forEach(value => {
+        if (value && value.showInFeatures === true) {
+          results.push(value)
+        }
+        parseVisibleFeatures(value, results) // Now value potentially has inferred type
+      })
+    }
+  }
+  return results
 }
 
 export function parseSchedules (schedules: Schedule[]): SimplifiedSchedule[] {
@@ -64,7 +75,7 @@ export function parseSchedules (schedules: Schedule[]): SimplifiedSchedule[] {
       name: schedule.circuit.name,
       startTime: convertTo12HourFormat(schedule.startTime),
       endTime: convertTo12HourFormat(schedule.endTime),
-      days: days,
+      days,
       isOn: schedule.isOn,
       isLight: schedule.circuit.type.isLight,
       equipmentType: schedule.equipmentType
