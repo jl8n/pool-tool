@@ -4,6 +4,7 @@ const POOL_API_BASE_URL = 'http://127.0.0.1:4200' // Pool API URL
 
 import { parseSchedules } from './poolHelper.js'
 
+
 export async function fetchAll () {
   try {
     const endpoint = `${POOL_API_BASE_URL}/state/all`
