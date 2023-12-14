@@ -65,7 +65,6 @@ const toggleFeature = async (item, newState) => {
 
 <template>
   <q-page padding>
-    pleasxe bro
     <div class="row space-between">
       <div class="col">
         {{ poolDataAll.model }}
