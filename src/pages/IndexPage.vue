@@ -4,7 +4,7 @@ import { QIcon, QToggle } from 'quasar'
 import { useLayoutStore } from 'stores/layout-store'
 import { poolSetState, fetchDashboard, fetchSchedules, fetchAll } from '../fetches/poolFetch.ts'
 import { parseVisibleFeatures } from '../fetches/poolHelper.ts'
-import { apiRequest } from 'src/fetches/generic'
+// import { apiRequest } from 'src/fetches/generic'
 
 const layoutStore = useLayoutStore()
 const poolDataAll = ref([])
@@ -18,14 +18,14 @@ const poolTemps = ref({ // Will hold the fetched dashboard data
   bodies: []
 })
 
-const data = await apiRequest('state/all', '')
-console.log('data', data)
+// const data = await apiRequest('state/all', '')
+// console.log('data', data)
 
 const currentDateTime = ref(new Date().toLocaleString())
 let intervalId
 
-const pool = computed(() => poolTemps.value?.bodies.find(body => body.type.name === 'pool'))
-const spa = computed(() => poolTemps.value?.bodies.find(body => body.type.name === 'spa'))
+const pool = computed(() => poolTemps.value.bodies.find(body => body.type.name === 'pool'))
+const spa = computed(() => poolTemps.value.bodies.find(body => body.type.name === 'spa'))
 
 // State to track if the drawer is open
 onMounted(async () => {
@@ -65,6 +65,7 @@ const toggleFeature = async (item, newState) => {
 
 <template>
   <q-page padding>
+    pleasxe bro
     <div class="row space-between">
       <div class="col">
         {{ poolDataAll.model }}
