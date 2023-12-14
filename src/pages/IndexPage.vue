@@ -1,9 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { QIcon, QToggle } from 'quasar'
+import { useLayoutStore } from 'stores/layout-store'
 import { poolSetState, fetchDashboard, fetchSchedules, fetchAll } from '../fetches/poolFetch.ts'
 import { parseVisibleFeatures } from '../fetches/poolHelper.ts'
+import { apiRequest } from 'src/fetches/generic'
 
+const layoutStore = useLayoutStore()
 const poolDataAll = ref([])
 const poolSchedules = ref([])
 const poolVisibleFeatures = ref([])
@@ -15,6 +18,9 @@ const poolTemps = ref({ // Will hold the fetched dashboard data
   bodies: []
 })
 
+const data = await apiRequest('state/all', '')
+console.log('data', data)
+
 const currentDateTime = ref(new Date().toLocaleString())
 let intervalId
 
@@ -22,18 +28,13 @@ const pool = computed(() => poolTemps.value?.bodies.find(body => body.type.name 
 const spa = computed(() => poolTemps.value?.bodies.find(body => body.type.name === 'spa'))
 
 // State to track if the drawer is open
-const isDrawerOpen = ref(false)
-
-// Toggle the state of the drawer
-const toggleLeftDrawer = () => {
-  isDrawerOpen.value = !isDrawerOpen.value
-}
 onMounted(async () => {
   try {
     poolTemps.value = await fetchDashboard()
     poolSchedules.value = await fetchSchedules()
     poolDataAll.value = await fetchAll()
     poolVisibleFeatures.value = parseVisibleFeatures(poolDataAll.value)
+    layoutStore.easytouchVersion = poolDataAll.value.model
 
     intervalId = setInterval(() => {
       currentDateTime.value = new Date().toLocaleString()
@@ -63,147 +64,146 @@ const toggleFeature = async (item, newState) => {
 </script>
 
 <template>
-  <div class="dashboard">
-    <q-header elevated class="bg-primary text-white">
-      <q-toolbar>
-        <q-btn flat dense round @click="toggleLeftDrawer">
-          <q-icon name="menu" />
-        </q-btn>
-
-        <q-toolbar-title>
-          {{ poolDataAll.model }}
-        </q-toolbar-title>
-
-        <q-space />
-
-        <div class="text-h7">{{ currentDateTime }}</div>
-
-        <q-space />
-
-        <div>
-          <q-icon name="check_circle" v-if="isReady" class="text-green" />
-          <span v-if="isReady">Ready</span>
-          <q-icon name="settings" right />
-        </div>
-      </q-toolbar>
-    </q-header>
-
-    <!-- Drawer -->
-    <div :class="['left-drawer', isDrawerOpen ? 'open' : '']">
-      <!-- Your drawer content goes here -->
-      <p>Test text inside the drawer</p>
-    </div>
-
-    <div class="content">
-      <!-- Toggle button for the drawer -->
-      <q-btn flat dense round @click="toggleLeftDrawer" class="toggle-drawer-btn">
-        <q-icon name="menu" />
-      </q-btn>
-      <div class="left-column">
-        <div class="temperature-display">
-          <div class="air-temp">
-            <i class="fas fa-sun"></i>
-            Air Temp: {{ poolTemps?.air }}°{{ poolTemps?.units?.name }}
-          </div>
-          <div class="section pool" v-if="poolTemps && pool">
-            <div class="section-header">
-              <i class="fas fa-tint"></i>
-              {{ pool.name }}
-            </div>
-            <div class="temperature-current">{{ pool.setPoint }}°</div>
-            <div class="temperature-info">Set Point: {{ pool.setPoint }}°{{ poolTemps?.units?.name }}</div>
-            <div class="temperature-info">Heat Mode: {{ pool.heatMode.desc }}</div>
-            <div class="temperature-info">Heater Status: {{ pool.heatStatus.desc }}</div>
-          </div>
-          <div class="section spa" v-if="poolTemps && spa">
-            <div class="section-header">
-              <i class="fas fa-hot-tub"></i>
-              {{ spa.name }}
-            </div>
-            <div class="temperature-current">{{ spa.setPoint }}°</div>
-            <div class="temperature-info">Set Point: {{ spa.setPoint }}°{{ poolTemps?.units?.name }}</div>
-            <div class="temperature-info">Heat Mode: {{ spa.heatMode.desc }}</div>
-            <div class="temperature-info">Heater Status: {{ spa.heatStatus.desc }}</div>
-          </div>
-        </div>
-        <!-- Pumps Section -->
-        <div class="section pumps">
-          <div class="section-header">Pumps</div>
-          <!-- Pump Components -->
-        </div>
+  <q-page padding>
+    <div class="row space-between">
+      <div class="col">
+        {{ poolDataAll.model }}
       </div>
-      <div class="right-column">
-        <!-- Features Section -->
-        <div class="section features">
-          <div class="section-header">Features</div>
-          <!-- Features Toggle Components -->
-          <div class="q-gutter-y-md">
-            {{ poolVisibleFeatures.value }}
-            <div v-for="obj in poolVisibleFeatures" :key="obj.id" class="flex items-center">
-              <q-toggle :label="obj.name" :model-value="obj.isOn"
-                @update:model-value="newState => toggleFeature(obj, newState)"></q-toggle>
-            </div>
-          </div>
-        </div>
-        <!-- Schedules Section -->
-        <div class="section schedules">
-          <div class="section-header">Schedules</div>
-          <div v-for="schedule in poolSchedules" :key="schedule.id" class="schedule-item">
-            <strong>{{ schedule.name }}</strong> {{ schedule.startTime }} - {{ schedule.endTime }}
-            <table class="days-table">
-              <tr>
-                <th>Sun</th>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-              </tr>
-              <tr>
-                <td v-for="(day, index) in schedule.days" :key="index">
-                  <span v-if="day === 1">✓</span>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <!-- Schedules Components -->
-        </div>
+      <div class="col text-h7 text-right">
+        {{ currentDateTime }}
       </div>
     </div>
-  </div>
+
+    <div>
+      <q-icon
+        v-if="isReady"
+        name="check_circle"
+        class="text-green"
+      />
+      <span v-if="isReady">Ready</span>
+      <q-icon
+        name="settings"
+        right
+      />
+    </div>
+    <div class="left-column">
+      <div class="temperature-display">
+        <div class="air-temp">
+          <i class="fas fa-sun" />
+          Air Temp: {{ poolTemps?.air }}°{{ poolTemps?.units?.name }}
+        </div>
+        <div
+          v-if="poolTemps && pool"
+          class="section pool"
+        >
+          <div class="section-header">
+            <i class="fas fa-tint" />
+            {{ pool.name }}
+          </div>
+          <div class="temperature-current">
+            {{ pool.setPoint }}°
+          </div>
+          <div class="temperature-info">
+            Set Point: {{ pool.setPoint }}°{{ poolTemps?.units?.name }}
+          </div>
+          <div class="temperature-info">
+            Heat Mode: {{ pool.heatMode.desc }}
+          </div>
+          <div class="temperature-info">
+            Heater Status: {{ pool.heatStatus.desc }}
+          </div>
+        </div>
+        <div
+          v-if="poolTemps && spa"
+          class="section spa"
+        >
+          <div class="section-header">
+            <i class="fas fa-hot-tub" />
+            {{ spa.name }}
+          </div>
+          <div class="temperature-current">
+            {{ spa.setPoint }}°
+          </div>
+          <div class="temperature-info">
+            Set Point: {{ spa.setPoint }}°{{ poolTemps?.units?.name }}
+          </div>
+          <div class="temperature-info">
+            Heat Mode: {{ spa.heatMode.desc }}
+          </div>
+          <div class="temperature-info">
+            Heater Status: {{ spa.heatStatus.desc }}
+          </div>
+        </div>
+      </div>
+      <!-- Pumps Section -->
+      <div class="section pumps">
+        <div class="section-header">
+          Pumps
+        </div>
+        <!-- Pump Components -->
+      </div>
+    </div>
+    <div class="right-column">
+      <!-- Features Section -->
+      <div class="section features">
+        <div class="section-header">
+          Features
+        </div>
+        <!-- Features Toggle Components -->
+        <div class="q-gutter-y-md">
+          {{ poolVisibleFeatures.value }}
+          <div
+            v-for="obj in poolVisibleFeatures"
+            :key="obj.id"
+            class="flex items-center"
+          >
+            <q-toggle
+              :label="obj.name"
+              :model-value="obj.isOn"
+              @update:model-value="newState => toggleFeature(obj, newState)"
+            />
+          </div>
+        </div>
+      </div>
+      <!-- Schedules Section -->
+      <div class="section schedules">
+        <div class="section-header">
+          Schedules
+        </div>
+        <div
+          v-for="schedule in poolSchedules"
+          :key="schedule.id"
+          class="schedule-item"
+        >
+          <strong>{{ schedule.name }}</strong> {{ schedule.startTime }} - {{ schedule.endTime }}
+          <table class="days-table">
+            <tr>
+              <th>Sun</th>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+            </tr>
+            <tr>
+              <td
+                v-for="(day, index) in schedule.days"
+                :key="index"
+              >
+                <span v-if="day === 1">✓</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Schedules Components -->
+      </div>
+    </div>
+  </q-page>
 </template>
 
 <style scoped>
-.dashboard {
-  max-width: 768px;
-  /* Set a max-width that works well on all devices */
-  margin: 0 auto;
-  /* Center the dashboard in the available space */
-  padding: 1rem;
-  /* Add padding around the dashboard for spacing */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Subtle shadow for depth */
-}
-
-.header {
-  background-color: #009688;
-  /* Example header color */
-  color: #fff;
-  padding: 0.5rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  /* Space below the header */
-}
-
-.content {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  /* Space between columns */
-}
-
 .left-column,
 .right-column {
   flex: 1;
@@ -227,10 +227,6 @@ const toggleFeature = async (item, newState) => {
   /* Subtle border for delineation */
   border-radius: 8px;
   /* Rounded corners */
-}
-
-.temperature-display {
-  /* Styling for the temperature display */
 }
 
 .air-temp {
@@ -303,29 +299,6 @@ const toggleFeature = async (item, newState) => {
 
 .days-table th {
   background-color: #f0f0f0;
-}
-
-.left-drawer {
-  position: fixed;
-  left: -250px; /* Hide the drawer off-screen */
-  top: 0;
-  bottom: 0;
-  width: 250px;
-  background-color: #fff;
-  overflow-y: auto;
-  transition: left 0.3s ease-in-out;
-  z-index: 1000;
-}
-
-.left-drawer.open {
-  left: 0; /* Slide the drawer into view */
-}
-
-.toggle-drawer-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1010; /* Make sure it's above the drawer */
 }
 
 /* Responsiveness */

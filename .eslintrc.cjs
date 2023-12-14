@@ -22,7 +22,7 @@ module.exports = {
   // Rules order is important, please avoid shuffling them
   extends: [
     // Base ESLint recommended rules
-    // 'eslint:recommended',
+    'eslint:recommended',
 
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage
     // ESLint typescript rules
@@ -32,8 +32,8 @@ module.exports = {
     // but leave only one uncommented!
     // See https://eslint.vuejs.org/rules/#available-rules
     'plugin:vue/vue3-essential', // Priority A: Essential (Error Prevention)
-    // 'plugin:vue/vue3-strongly-recommended', // Priority B: Strongly Recommended (Improving Readability)
-    // 'plugin:vue/vue3-recommended', // Priority C: Recommended (Minimizing Arbitrary Choices and Cognitive Overhead)
+    'plugin:vue/vue3-strongly-recommended', // Priority B: Strongly Recommended (Improving Readability)
+    'plugin:vue/vue3-recommended', // Priority C: Recommended (Minimizing Arbitrary Choices and Cognitive Overhead)
 
     'standard'
 
@@ -62,8 +62,8 @@ module.exports = {
     chrome: 'readonly'
   },
 
-  // add your custom rules here
   rules: {
+    '@typescript-eslint/no-explicit-any': 'error',
 
     // allow async-await
     'generator-star-spacing': 'off',
@@ -78,7 +78,7 @@ module.exports = {
     'import/default': 'error',
     'import/export': 'error',
     'import/extensions': 'off',
-    'import/no-unresolved': 'off',
+    'import/no-unresolved': 'error',
     'import/no-extraneous-dependencies': 'off',
 
     // The core 'import/named' rules
@@ -100,6 +100,21 @@ module.exports = {
     'no-unused-vars': 'off',
 
     // allow debugger during development only
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+
+    // allow single word component names (i.e. Index.vue)
+    'vue/multi-word-component-names': 'off'
+  },
+
+  // quasar aliases compatability ( `stores/` rather than `src/stores/`, etc.)
+  // these are defined in tsconfig.json under `paths`
+  settings: {
+    'import/resolver': {
+      typescript: {
+        // a list of file extensions your modules use
+        alwaysTryTypes: true,
+        project: './'
+      }
+    }
   }
 }

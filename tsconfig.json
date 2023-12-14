@@ -1,6 +1,10 @@
 {
   "extends": "@quasar/app-vite/tsconfig-preset",
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "strict": true
+  },
+  "paths": {
+    "stores/*": ["src/stores/*"],
   }
 }

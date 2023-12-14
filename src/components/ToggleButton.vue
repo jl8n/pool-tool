@@ -3,8 +3,14 @@ import { ref } from 'vue'
 
 // Define your props
 const props = defineProps({
-  label: String,
-  endpoint: String
+  label: {
+    type: String,
+    default: ''
+  },
+  endpoint: {
+    type: String,
+    default: ''
+  }
 })
 
 const buttonState = ref(false)
@@ -28,13 +34,27 @@ const toggleButtonState = async () => {
 </script>
 
 <template>
-  <div v-cloak class="column q-gutter-y-md">
-      <q-btn :color="buttonState ? 'blue' : 'grey'" @click="toggleButtonState">{{ props.label }}</q-btn>
-      <div v-if="resData && resData.length">
-          <p>The server sent:</p>
-          <div v-for="item in resData" :key="item.id">
-              <q-toggle :label="item.name" v-model="item.isOn"></q-toggle>
-          </div>
+  <div
+    v-cloak
+    class="column q-gutter-y-md"
+  >
+    <q-btn
+      :color="buttonState ? 'blue' : 'grey'"
+      @click="toggleButtonState"
+    >
+      {{ props.label }}
+    </q-btn>
+    <div v-if="resData && resData.length">
+      <p>The server sent:</p>
+      <div
+        v-for="item in resData"
+        :key="item.id"
+      >
+        <q-toggle
+          v-model="item.isOn"
+          :label="item.name"
+        />
       </div>
+    </div>
   </div>
 </template>
