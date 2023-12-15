@@ -1,4 +1,4 @@
-# Pool Control (pool-control)
+# Pool Tool
 
 DIY pool control
 

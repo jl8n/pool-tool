@@ -1,9 +1,12 @@
 {
-  "name": "pool-control",
+  "name": "pool-tool",
   "version": "0.0.1",
-  "description": "DIY pool control",
-  "productName": "Pool Control",
+  "description": "Web interface for DIY pool control and monitoring",
+  "productName": "Pool Tool",
   "author": "Josh Layton <josh.l8n@gmail.com>",
+  "contributors": [
+    {"name":"Roger Layton","url":"https://github.com/wr45"}
+  ],
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",

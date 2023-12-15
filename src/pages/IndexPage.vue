@@ -109,7 +109,10 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
           <i class="fas fa-sun" />
           Air Temp: {{ poolTemps?.air }}°{{ poolTemps?.units?.name }}
         </div>
-        <div v-if="poolTemps && pool" class="section pool">
+        <div
+          v-if="poolTemps && pool"
+          class="section pool"
+        >
           <div class="section-header">
             <i class="fas fa-tint" />
             {{ pool.name }}
@@ -127,7 +130,10 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
             Heater Status: {{ pool.heatStatus.desc }}
           </div>
         </div>
-        <div v-if="poolTemps && spa" class="section spa">
+        <div
+          v-if="poolTemps && spa"
+          class="section spa"
+        >
           <div class="section-header">
             <i class="fas fa-hot-tub" />
             {{ spa.name }}
@@ -163,9 +169,16 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
         <!-- Features Toggle Components -->
         <div class="q-gutter-y-md">
           {{ poolVisibleFeatures }}
-          <div v-for="obj in poolVisibleFeatures" :key="obj.id" class="flex items-center">
-            <q-toggle :label="obj.name" :model-value="obj.isOn"
-              @update:model-value="newState => toggleFeature(obj, newState)" />
+          <div
+            v-for="obj in poolVisibleFeatures"
+            :key="obj.id"
+            class="flex items-center"
+          >
+            <q-toggle
+              :label="obj.name"
+              :model-value="obj.isOn"
+              @update:model-value="newState => toggleFeature(obj, newState)"
+            />
           </div>
         </div>
       </div>
@@ -174,7 +187,11 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
         <div class="section-header">
           Schedules
         </div>
-        <div v-for="schedule in poolSchedules" :key="schedule.id" class="schedule-item">
+        <div
+          v-for="schedule in poolSchedules"
+          :key="schedule.id"
+          class="schedule-item"
+        >
           <strong>{{ schedule.name }}</strong> {{ schedule.startTime }} - {{ schedule.endTime }}
           <table class="days-table">
             <tr>
@@ -187,7 +204,10 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
               <th>Sat</th>
             </tr>
             <tr>
-              <td v-for="(day, index) in schedule.days" :key="index">
+              <td
+                v-for="(day, index) in schedule.days"
+                :key="index"
+              >
                 <span v-if="day === 1">✓</span>
               </td>
             </tr>
