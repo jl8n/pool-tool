@@ -3,8 +3,11 @@
 const POOL_API_BASE_URL = 'http://127.0.0.1:4200' // Pool API URL
 
 import { parseSchedules } from './poolHelper.js'
+import type { AllResponse } from 'src/types/AllResponse.types'
+import type { TempsResponse } from 'src/types/TempsResponse.types'
+import type { SchedulesResponse } from 'src/types/SchedulesResponse.types'
 
-export async function fetchAll () {
+export async function fetchAll () : Promise<AllResponse> {
   try {
     const endpoint = `${POOL_API_BASE_URL}/state/all`
     const res = await fetch(endpoint)
@@ -13,7 +16,7 @@ export async function fetchAll () {
       throw new Error(`HTTP error! Status: ${res.status}`)
     }
 
-    return await res.json()
+    return await res.json() as AllResponse
   } catch (error) {
     console.error('Error updating state:', error || 'Unknown error')
     throw error
@@ -29,14 +32,16 @@ export async function fetchSchedules () {
       throw new Error(`HTTP error! Status: ${res.status}`)
     }
 
-    return parseSchedules(await res.json())
+    const resData = await res.json() as SchedulesResponse
+
+    return parseSchedules(resData)
   } catch (error) {
     console.error('Error updating state:', error || 'Unknown error')
     throw error
   }
 }
 
-export async function fetchDashboard () {
+export async function fetchDashboard () : Promise<TempsResponse> {
   try {
     const endpoint = `${POOL_API_BASE_URL}/state/temps`
     const res = await fetch(endpoint)
@@ -45,7 +50,7 @@ export async function fetchDashboard () {
       throw new Error(`HTTP error! Status: ${res.status}`)
     }
 
-    const resData = await res.json()
+    const resData = await res.json() as TempsResponse
     console.warn('fetching Dashboard: ', resData)
     return resData
   } catch (error) {

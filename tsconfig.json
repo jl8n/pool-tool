@@ -15,11 +15,16 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"]
   },
+  "paths": {
+    "stores/*": ["src/stores/*"],
+    "types/*": ["src/types/*"],
+    "fetches/*": ["src/fetches/*"],
+  },
   "include": [
-  "src/**/*.ts",
-  "src/**/*.d.ts",
-  "src/**/*.tsx",
-  "src/**/*.vue"
-]
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ]
 
 }

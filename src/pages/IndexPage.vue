@@ -3,20 +3,25 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { QToggle } from 'quasar'
 import { useLayoutStore } from 'stores/layout-store'
 import { poolSetState, fetchDashboard, fetchSchedules, fetchAll } from '../fetches/poolFetch'
-import { parseVisibleFeatures, SimplifiedSchedule } from '../fetches/poolHelper'
-import type { NixieResponse, TempBody } from 'pages/IndexPage.types'
+import { parseVisibleFeatures } from '../fetches/poolHelper'
+import type { TempBody } from 'pages/IndexPage.types'
+import type { AllResponse } from 'src/types/AllResponse.types'
+import type { TempsResponse } from 'src/types/TempsResponse.types'
+import type { ParsedSchedule, Feature } from 'src/fetches/poolHelper.types'
 // import { apiRequest } from 'src/fetches/generic'
 
 const layoutStore = useLayoutStore()
 
-const poolDataAll = ref<NixieResponse>()
-const poolSchedules = ref<SimplifiedSchedule[]>([])
-const poolVisibleFeatures = ref<SimplifiedSchedule[]>([])
+const poolDataAll = ref<AllResponse>()
+const poolSchedules = ref<ParsedSchedule[]>([])
+const poolVisibleFeatures = ref<Feature[]>([])
 
-const poolTemps = ref({ // Will hold the fetched dashboard data
-  air: '',
+const poolTemps = ref<TempsResponse>({ // Will hold the fetched dashboard data
+  air: 0,
   units: {
-    name: ''
+    name: '',
+    val: 0,
+    desc: ''
   },
   bodies: [] as TempBody[]
 })
@@ -43,6 +48,7 @@ onMounted(async () => {
     poolTemps.value = await fetchDashboard()
     poolSchedules.value = await fetchSchedules()
     poolDataAll.value = await fetchAll()
+
     if (poolDataAll.value) {
       // Safe to access properties
       poolVisibleFeatures.value = parseVisibleFeatures(poolDataAll.value)
@@ -64,14 +70,14 @@ onUnmounted(() => {
   clearInterval(intervalId)
 })
 
-const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
+const toggleFeature = async (feature: Feature, newState: boolean) => {
   try {
     // Call the poolSetState function
-    await poolSetState(item.id, newState, item.equipmentType)
+    await poolSetState(feature.id, newState, feature.equipmentType)
 
     // Update the local state to reflect the change
-    item.isOn = newState
-    console.log('State updated for ID:', item.id)
+    feature.isOn = newState
+    console.log('State updated for ID:', feature.id)
   } catch (error) {
     let message = 'Unknown error'
     if (error instanceof Error) message = error.message
@@ -168,12 +174,12 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
         </div>
         <!-- Features Toggle Components -->
         <div class="q-gutter-y-md">
-          {{ poolVisibleFeatures }}
           <div
             v-for="obj in poolVisibleFeatures"
             :key="obj.id"
             class="flex items-center"
           >
+            {{ obj }}
             <q-toggle
               :label="obj.name"
               :model-value="obj.isOn"
@@ -318,27 +324,4 @@ const toggleFeature = async (item: SimplifiedSchedule, newState: boolean) => {
   background-color: #f0f0f0;
 }
 
-/* Responsiveness */
-@media (max-width: 992px) {
-
-  /* Medium devices (tablets, 768px and up) */
-  .content {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 768px) {
-
-  /* Small devices (landscape phones, less than 768px) */
-  .dashboard {
-    max-width: 100%;
-    padding: 0.5rem;
-  }
-
-  .left-column,
-  .right-column {
-    /* Adjust flex-basis if you want non-equal widths for left and right columns */
-    flex-basis: 100%;
-  }
-}
 </style>

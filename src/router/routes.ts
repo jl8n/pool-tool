@@ -8,10 +8,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue')
-      },
-      {
-        path: 'generic',
-        component: () => import('pages/Generic.vue')
       }
     ]
   },

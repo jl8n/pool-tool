@@ -1,45 +1,8 @@
-interface Feature {
-  id: number;
-  name: string;
-  // ... other relevant properties for displaying features
-}
+import type { SchedulesResponse } from 'src/types/SchedulesResponse.types'
+import type { Feature, ParsedSchedule } from './poolHelper.types'
+import type { AllResponse } from 'src/types/AllResponse.types'
 
-export interface SimplifiedSchedule {
-  id: number;
-  name: string;
-  startTime: number;
-  endTime: number;
-  days: number[];
-  isOn: boolean;
-  isLight: boolean;
-  equipmentType: string;
-}
-
-interface Day {
-  name: string;
-  dow: number;
-}
-
-interface ScheduleDays {
-  days: Day[];
-}
-
-interface Circuit {
-  name: string;
-}
-
-export interface Schedule {
-  id: number;
-  startTime: number;
-  endTime: number;
-  scheduleDays: ScheduleDays;
-  circuit: Circuit;
-  isOn: boolean;
-  isLight: boolean;
-  equipmentType: string;
-}
-
-export function parseVisibleFeatures (obj: SimplifiedSchedule, results: Feature[] = []): Feature[] {
+export function parseVisibleFeatures (obj: AllResponse, results: Feature[] = []): Feature[] {
   if (typeof obj === 'object' && obj !== null) {
     if (Array.isArray(obj)) {
       for (const item of obj) {
@@ -60,17 +23,17 @@ export function parseVisibleFeatures (obj: SimplifiedSchedule, results: Feature[
   return results
 }
 
-export function parseSchedules (schedules: Schedule[]): SimplifiedSchedule[] {
+export function parseSchedules (schedules: SchedulesResponse): ParsedSchedule[] {
   return schedules.map(schedule => {
     // Initialize a 7-element array with zeros
-    const days = new Array(7).fill(0)
+    const days = Array.from({ length: 7 }, () => 0)
 
     // Iterate over the days array and place a 1 at the index of the dow value
     schedule.scheduleDays.days.forEach(day => {
       days[day.dow] = 1
     })
 
-    return {
+    const parsed: ParsedSchedule = {
       id: schedule.id,
       name: schedule.circuit.name,
       startTime: convertTo12HourFormat(schedule.startTime),
@@ -80,6 +43,8 @@ export function parseSchedules (schedules: Schedule[]): SimplifiedSchedule[] {
       isLight: schedule.circuit.type.isLight,
       equipmentType: schedule.equipmentType
     }
+
+    return parsed
   })
 }
 
