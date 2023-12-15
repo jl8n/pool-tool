@@ -42,7 +42,6 @@ const spa = computed<TempBody | undefined>(() =>
   poolTemps.value.bodies.find(body => body.type.name === 'spa')
 )
 
-// State to track if the drawer is open
 onMounted(async () => {
   try {
     poolTemps.value = await fetchDashboard()
@@ -52,7 +51,10 @@ onMounted(async () => {
     if (poolDataAll.value) {
       // Safe to access properties
       poolVisibleFeatures.value = parseVisibleFeatures(poolDataAll.value)
-      layoutStore.easytouchVersion = poolDataAll.value.model
+
+      // correctly format EasyTouch version string from API
+      const regex = /([a-zA-Z]+)(\d+)\s+(\d+)/
+      layoutStore.easytouchVersion = poolDataAll.value.model.replace(regex, '$1 $2.$3')
     } else {
       // Handle the null case, set features and version to appropriate values
     }

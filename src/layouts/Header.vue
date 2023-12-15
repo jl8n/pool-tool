@@ -20,27 +20,30 @@ const layoutStore = useLayoutStore()
       />
 
       <q-toolbar-title>
-        Pool Control
+        <router-link
+          to="/"
+          class="title"
+        >
+          Pool Control
+        </router-link>
       </q-toolbar-title>
 
       <q-btn
         flat
         round
         icon="info"
-      >
-        <q-menu>
-          <div class="row no-wrap q-pa-md">
-            <div
-              class="column"
-              style="white-space: nowrap;"
-            >
-              <div>{{ layoutStore.easytouchVersion }}</div>
-            </div>
-
-            <div class="column items-center" />
-          </div>
-        </q-menu>
-      </q-btn>
+        to="/info"
+      />
     </q-toolbar>
   </q-header>
 </template>
+
+<style scoped lang="scss">
+.title {
+  text-decoration: none;
+
+  &:visited {
+    color: #FFFFFF;
+  }
+}
+</style>
