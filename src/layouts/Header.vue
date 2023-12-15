@@ -30,7 +30,10 @@ const layoutStore = useLayoutStore()
       >
         <q-menu>
           <div class="row no-wrap q-pa-md">
-            <div class="column">
+            <div
+              class="column"
+              style="white-space: nowrap;"
+            >
               <div>{{ layoutStore.easytouchVersion }}</div>
             </div>
 

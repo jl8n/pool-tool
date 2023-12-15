@@ -90,7 +90,10 @@ const toggleFeature = async (feature: Feature, newState: boolean) => {
   <q-page padding>
     <div class="row space-between">
       <div class="col">
-        {{ poolDataAll?.model }}
+        <div class="air-temp">
+          <i class="fas fa-sun" />
+          Air Temp: {{ poolTemps?.air }}&deg;{{ poolTemps?.units?.name }}
+        </div>
       </div>
       <div class="col text-h7 text-right">
         {{ currentDateTime }}
@@ -111,10 +114,6 @@ const toggleFeature = async (feature: Feature, newState: boolean) => {
     </div>
     <div class="left-column">
       <div class="temperature-display">
-        <div class="air-temp">
-          <i class="fas fa-sun" />
-          Air Temp: {{ poolTemps?.air }}°{{ poolTemps?.units?.name }}
-        </div>
         <div
           v-if="poolTemps && pool"
           class="section pool"
@@ -149,7 +148,7 @@ const toggleFeature = async (feature: Feature, newState: boolean) => {
           </div>
           <div class="temperature-info">
             Set Point: {{ spa.setPoint }}°{{ poolTemps?.units?.name }}
-          </div>
+          </div>Featuresobj
           <div class="temperature-info">
             Heat Mode: {{ spa.heatMode.desc }}
           </div>
@@ -175,15 +174,14 @@ const toggleFeature = async (feature: Feature, newState: boolean) => {
         <!-- Features Toggle Components -->
         <div class="q-gutter-y-md">
           <div
-            v-for="obj in poolVisibleFeatures"
-            :key="obj.id"
+            v-for="feature in poolVisibleFeatures"
+            :key="feature.id"
             class="flex items-center"
           >
-            {{ obj }}
             <q-toggle
-              :label="obj.name"
-              :model-value="obj.isOn"
-              @update:model-value="newState => toggleFeature(obj, newState)"
+              :label="feature.name"
+              :model-value="feature.isOn"
+              @update:model-value="newState => toggleFeature(feature, newState)"
             />
           </div>
         </div>
